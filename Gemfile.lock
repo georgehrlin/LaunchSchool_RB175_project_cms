@@ -1,0 +1,39 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    erubi (1.13.1)
+    multi_json (1.21.1)
+    mustermann (2.0.2)
+      ruby2_keywords (~> 0.0.1)
+    rack (2.2.23)
+    rack-protection (2.2.4)
+      rack
+    ruby2_keywords (0.0.5)
+    sinatra (2.2.4)
+      mustermann (~> 2.0)
+      rack (~> 2.2)
+      rack-protection (= 2.2.4)
+      tilt (~> 2.0)
+    sinatra-contrib (2.2.4)
+      multi_json
+      mustermann (~> 2.0)
+      rack-protection (= 2.2.4)
+      sinatra (= 2.2.4)
+      tilt (~> 2.0)
+    tilt (2.7.0)
+    webrick (1.9.2)
+
+PLATFORMS
+  arm64-darwin-25
+
+DEPENDENCIES
+  erubi
+  sinatra (~> 2.0)
+  sinatra-contrib (~> 2.0)
+  webrick
+
+RUBY VERSION
+   ruby 3.2.2p53
+
+BUNDLED WITH
+   2.4.10
