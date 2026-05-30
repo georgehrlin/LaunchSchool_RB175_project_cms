@@ -32,7 +32,18 @@ class CMSTest < Minitest::Test
 
   def test_invalid_file_name
     get '/iaminvalid.lol'
-    binding.pry
     assert_equal 302, last_response.status
+
+    get last_response["Location"]
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'iaminvalid.lol does not exist.'
+
+    get '/'
+    refute_includes last_response.body, 'iaminvalid.lol does not exist.'
+  end
+
+  def test_markdown_to_html
+    get '/markdown.md'
+    assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
   end
 end
