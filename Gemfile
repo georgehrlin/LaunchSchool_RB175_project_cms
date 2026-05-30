@@ -5,7 +5,7 @@ gem 'sinatra-contrib', '~> 2.0'
 gem 'erubi'
 gem 'webrick'
 
-gem 'pry'
+gem 'pry-byebug'
 
 gem 'minitest'
 gem 'rack-test'

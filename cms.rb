@@ -2,21 +2,32 @@ require 'sinatra'
 require 'sinatra/contrib'
 require 'sinatra/reloader'
 require 'tilt/erubi'
+require 'pry-byebug'
 
-root = File.expand_path("..", __FILE__)
+enable :sessions
 
-get "/" do
-  # @files = Dir.children("data/") # Original solution from myself
-  @files = Dir.glob(root + "/data/*").map do |path|
-    File.basename(path)
-  end
+before do
+  @root = File.expand_path('..', __FILE__)
+  @files_in_data = Dir.glob(@root + '/data/*').map { |path| File.basename(path) }
+end
+
+def valid_file_name?(file_name)
+  @files_in_data.include?(file_name)
+end
+
+get '/' do
   erb :index, layout: :layout
 end
 
-get "/:filename" do
-  # @file = File.readlines("data/#{params[:file_name]}") # Original solution from myself
-  file_path = root + "/data/" + params[:filename]
+get '/:file_name' do
+  file_name = params[:file_name]
 
-  headers["Content-Type"] = "text/plain"
-  File.read(file_path)
+  if valid_file_name?(file_name)
+    file_path = @root + '/data/' + file_name
+    headers['Content-Type'] = 'text/plain'
+    File.read(file_path)
+  else
+    session[:error] = "#{file_name} does not exist."
+    redirect '/'
+  end
 end

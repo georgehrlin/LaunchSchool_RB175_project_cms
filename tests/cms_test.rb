@@ -12,7 +12,7 @@ class CMSTest < Minitest::Test
     Sinatra::Application
   end
 
-  def test_1
+  def test_index
     get '/'
 
     assert_equal 200, last_response.status
@@ -22,11 +22,17 @@ class CMSTest < Minitest::Test
     assert_includes last_response.body, 'history.txt'
   end
 
-  def test_2
+  def test_viewing_text_document
     get '/about.txt'
 
     assert_equal 200, last_response.status
     assert_equal 'text/plain', last_response['Content-Type']
     assert_includes last_response.body, 'I am about.txt line 2.'
+  end
+
+  def test_invalid_file_name
+    get '/iaminvalid.lol'
+    binding.pry
+    assert_equal 302, last_response.status
   end
 end

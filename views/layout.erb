@@ -5,6 +5,12 @@
     <title>CMS</title>
   </head>
   <body>
-    <%= yield %>
+    <% if session[:error] %>
+      <p><%= session.delete(:error) %></p>
+    <% end %>
+
+    <main>
+      <%= yield %>
+    </main>
   </body>
 </html>
