@@ -20,6 +20,7 @@ class CMSTest < Minitest::Test
     assert_includes last_response.body, 'about.txt'
     assert_includes last_response.body, 'changes.txt'
     assert_includes last_response.body, 'history.txt'
+    assert_includes last_response.body, 'ruby.md'
   end
 
   def test_viewing_text_document
@@ -43,7 +44,9 @@ class CMSTest < Minitest::Test
   end
 
   def test_markdown_to_html
-    get '/markdown.md'
+    get '/ruby.md'
+    assert_equal 200, last_response.status
     assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
+    assert_includes last_response.body, "simplicity and productivity"
   end
 end

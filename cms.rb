@@ -6,8 +6,6 @@ require 'redcarpet'
 
 require 'pry-byebug'
 
-markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
-
 configure do
   enable :sessions
   set :session_secret, SecureRandom.hex(32)
@@ -15,9 +13,19 @@ end
 
 root = File.expand_path('..', __FILE__)
 
-helpers do
-  def render_markdown(markdown_text)
-    markdown.render(markdown_text)
+def render_markdown(markdown_text)
+  markdown_renderer = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+  markdown_renderer.render(markdown_text)
+end
+
+def load_file_content(path)
+  content = File.read(path)
+  case File.extname(path)
+  when '.txt'
+    headers['Content-Type'] = 'text/plain'
+    File.read(path)
+  when '.md'
+    render_markdown(content)
   end
 end
 
@@ -32,13 +40,8 @@ get '/:file_name' do
   file_name = params[:file_name]
   file_path = root + '/data/' + file_name
 
-  if File.file?(file_path)
-    if File.basename(file_path).end_with?('.md')
-      markdown.render(File.read(file_path))
-    else
-      headers['Content-Type'] = 'text/plain'
-      File.read(file_path)
-    end
+  if File.exist?(file_path)
+    load_file_content(file_path)
   else
     session[:message] = "#{file_name} does not exist."
     redirect '/'
