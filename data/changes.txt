@@ -1,1 +1,3 @@
-I am changes.txt.
+I am changes.txt line 1.
+I am changes.txt line 2.
+I am changes.txt line 3.
