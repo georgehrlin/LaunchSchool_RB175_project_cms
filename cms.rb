@@ -47,13 +47,19 @@ get '/new' do
   erb :new, layout: :layout
 end
 
-post '/new/:new_file' do
+post '/new' do
   new_file_name = params[:new_file]
-  new_file_path = File.join(data_path, new_file_name)
+
   if new_file_name.empty?
     session[:message] = 'A name is required.'
-    redirect '/new'
+    status 422
+    erb :new
+  elsif !new_file_name.end_with?('.md') && !new_file_name.end_with?('.txt')
+    session[:message] = 'The file type must be .md or .txt.'
+    status 422
+    erb :new
   else
+    new_file_path = File.join(data_path, new_file_name)
     File.new(new_file_path, 'wx')
     session[:message] = "#{new_file_name} was created."
     redirect '/'

@@ -104,8 +104,14 @@ class CMSTest < Minitest::Test
   end
 
   def test_add_a_new_file
-    post '/new/test_file.md'
+    post '/new', new_file: 'test_file.md'
     assert_equal 302, last_response.status
     assert File.exist?(File.join(data_path, 'test_file.md'))
+  end
+
+  def test_add_a_new_file_without_a_name
+    post '/new', new_file: ''
+    assert_equal 422, last_response.status
+    assert_includes last_response.body, 'A name is required.'
   end
 end
