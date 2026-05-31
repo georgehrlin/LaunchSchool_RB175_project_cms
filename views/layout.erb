@@ -2,11 +2,14 @@
 <html lang='en-US'>
   <head>
     <meta charset='utf-8'>
+    <link rel="stylesheet" href="stylesheets/layout.css">
     <title>CMS</title>
   </head>
   <body>
     <% if session[:message] %>
+    <div class="notification">
       <p><%= session.delete(:message) %></p>
+    </div>
     <% end %>
 
     <main>
