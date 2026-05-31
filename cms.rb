@@ -47,13 +47,14 @@ get '/new' do
   erb :new, layout: :layout
 end
 
-post '/new' do
+post '/new/:new_file' do
   new_file_name = params[:new_file]
+  new_file_path = File.join(data_path, new_file_name)
   if new_file_name.empty?
     session[:message] = 'A name is required.'
     redirect '/new'
   else
-    File.new("data/#{new_file_name}", 'wx')
+    File.new(new_file_path, 'wx')
     session[:message] = "#{new_file_name} was created."
     redirect '/'
   end

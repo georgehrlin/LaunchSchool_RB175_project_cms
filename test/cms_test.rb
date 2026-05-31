@@ -96,4 +96,16 @@ class CMSTest < Minitest::Test
     assert_equal 200, last_response.status
     assert_includes last_response.body, 'testing'
   end
+
+  def test_page_to_add_a_new_file
+    get '/new'
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'a new document:'
+  end
+
+  def test_add_a_new_file
+    post '/new/test_file.md'
+    assert_equal 302, last_response.status
+    assert File.exist?(File.join(data_path, 'test_file.md'))
+  end
 end
