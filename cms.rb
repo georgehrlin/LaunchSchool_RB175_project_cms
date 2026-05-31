@@ -43,6 +43,22 @@ get '/' do
   erb :index, layout: :layout
 end
 
+get '/new' do
+  erb :new, layout: :layout
+end
+
+post '/new' do
+  new_file_name = params[:new_file]
+  if new_file_name.empty?
+    session[:message] = 'A name is required.'
+    redirect '/new'
+  else
+    File.new("data/#{new_file_name}", 'wx')
+    session[:message] = "#{new_file_name} was created."
+    redirect '/'
+  end
+end
+
 get '/:file_name' do
   file_name = params[:file_name]
   file_path = File.join(data_path, file_name)
