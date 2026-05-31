@@ -55,7 +55,7 @@ get '/:file_name/edit' do
   erb :edit, layout: :layout
 end
 
-post '/:file_name/edit' do
+post '/:file_name' do
   @file_name = params[:file_name]
   file_path = root + '/data/' + @file_name
   File.write(file_path, params['file_edit'])

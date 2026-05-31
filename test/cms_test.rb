@@ -50,8 +50,22 @@ class CMSTest < Minitest::Test
     assert_includes last_response.body, 'simplicity and productivity'
   end
 
-  def test_edit_a_file
-    post '/javascript.md/edit', file_edit: 'testing'
-    assert File.read('data/javascript.md').end_with?('testing')
+  def test_editing_a_document
+    get '/javascript.md/edit'
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, "<textarea"
+    assert_includes last_response.body, %q(<input type="submit")
+  end
+
+  def test_updating_a_document
+    post '/javascript.md', file_edit: 'testing'
+    assert_equal 302, last_response.status
+
+    get last_response['Location']
+    assert_includes last_response.body, "javascript.md has been updated."
+
+    get '/javascript.md'
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'testing'
   end
 end
