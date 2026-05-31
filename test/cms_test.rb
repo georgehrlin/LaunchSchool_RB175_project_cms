@@ -47,6 +47,11 @@ class CMSTest < Minitest::Test
     get '/ruby.md'
     assert_equal 200, last_response.status
     assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
-    assert_includes last_response.body, "simplicity and productivity"
+    assert_includes last_response.body, 'simplicity and productivity'
+  end
+
+  def test_edit_a_file
+    post '/javascript.md/edit', file_edit: 'testing'
+    assert File.read('data/javascript.md').end_with?('testing')
   end
 end
