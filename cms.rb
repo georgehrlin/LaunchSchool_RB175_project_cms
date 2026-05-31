@@ -85,6 +85,14 @@ get '/:file_name/edit' do
   erb :edit, layout: :layout
 end
 
+get '/:file_name/delete' do
+  file_name = params[:file_name]
+  file_path = File.join(data_path, file_name)
+  File.delete(file_path)
+  session[:message] = "#{@file_name} has been deleted."
+  redirect '/'
+end
+
 post '/:file_name' do
   @file_name = params[:file_name]
   file_path = File.join(data_path, @file_name)

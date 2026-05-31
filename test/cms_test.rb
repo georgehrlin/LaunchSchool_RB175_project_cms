@@ -114,4 +114,12 @@ class CMSTest < Minitest::Test
     assert_equal 422, last_response.status
     assert_includes last_response.body, 'A name is required.'
   end
+
+  def test_delete_a_file
+    create_document 'file_to_be_deleted.md'
+    assert File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
+
+    get '/file_to_be_deleted.md/delete'
+    refute File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
+  end
 end
