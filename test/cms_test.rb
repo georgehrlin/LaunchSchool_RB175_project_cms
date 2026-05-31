@@ -69,6 +69,7 @@ class CMSTest < Minitest::Test
 
     assert_equal 200, last_response.status
     assert_equal 'text/html;charset=utf-8', last_response['Content-Type']
+    assert_includes last_response.body, '<h1>Markdown is...</h1>'
     assert_includes last_response.body, 'to add formatting to plain text files'
   end
 
