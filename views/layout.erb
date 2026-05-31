@@ -2,14 +2,12 @@
 <html lang='en-US'>
   <head>
     <meta charset='utf-8'>
-    <link rel="stylesheet" href="stylesheets/layout.css">
+    <link rel="stylesheet" href="stylesheets/cms.css" type='text/css'>
     <title>CMS</title>
   </head>
   <body>
     <% if session[:message] %>
-    <div class="notification">
-      <p><%= session.delete(:message) %></p>
-    </div>
+      <p class="message"><%= session.delete(:message) %></p>
     <% end %>
 
     <main>
