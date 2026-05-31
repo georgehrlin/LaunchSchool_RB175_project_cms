@@ -1,3 +1,1 @@
-I am about.txt line 1.
-I am about.txt line 2.
-I am about.txt line 3.
+I have an apple. I have a pen. Aw APPLE PEN.
