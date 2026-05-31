@@ -119,7 +119,7 @@ class CMSTest < Minitest::Test
     create_document 'file_to_be_deleted.md'
     assert File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
 
-    get '/file_to_be_deleted.md/delete'
+    post '/file_to_be_deleted.md/delete'
     refute File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
   end
 end
