@@ -40,11 +40,38 @@ get '/' do
   @files_in_data = Dir.glob(pattern). map do |path|
     File.basename(path)
   end
-  erb :index, layout: :layout
+  erb :index
+end
+
+get '/users/signin' do
+  erb :signin
+end
+
+post '/users/signin' do
+  username = params[:username]
+  password = params[:password]
+
+  if username == 'admin' && password == 'secret'
+    session[:signed_in] = true
+    session[:username] = username
+    session[:message] = 'Welcome!'
+    redirect '/'
+  else
+    session[:message] = 'Invalid credentials.'
+    #redirect'/users/signin'
+    erb :signin
+  end
+end
+
+post '/users/signout' do
+  session[:signed_in] = false
+  session[:username] = nil
+  session[:message] = 'You are signed out.'
+  redirect '/'
 end
 
 get '/new' do
-  erb :new, layout: :layout
+  erb :new
 end
 
 post '/new' do
@@ -82,7 +109,7 @@ get '/:file_name/edit' do
   @file_name = params[:file_name]
   file_path = File.join(data_path, @file_name)
   @file_content = File.read(file_path)
-  erb :edit, layout: :layout
+  erb :edit
 end
 
 post '/:file_name' do

@@ -122,4 +122,26 @@ class CMSTest < Minitest::Test
     post '/file_to_be_deleted.md/delete'
     refute File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
   end
+
+  def test_sign_in_with_invalid_credentials
+    post '/users/signin', username: 'invalid', password: 'wrong password'
+    assert_equal 200, last_response.status
+    assert_includes last_response.body, 'Invalid credentials.'
+  end
+
+  def test_sign_in_with_valid_credentials
+    post '/users/signin', username: 'admin', password: 'secret'
+    assert_equal 302, last_response.status
+
+    get last_response['Location']
+    assert_includes last_response.body, 'Welcome!'
+  end
+
+  def test_sign_out_button
+    post '/users/signout'
+    assert_equal 302, last_response.status
+
+    get last_response['Location']
+    assert_includes last_response.body, 'You are signed out.'
+  end
 end
