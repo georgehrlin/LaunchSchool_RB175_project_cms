@@ -10,8 +10,12 @@
 
 <p><a href="/new">New Document</a></p>
 
-<% if session[:signed_in] %>
-  <p><em>Signed in as <%= session[:username] %>.</em></p><form action="/users/signout" method="post"><button type="submit">Sign Out</button></form>
+<% if session[:username] %>
+  <form method="post" action="/users/signout">
+    <p class="user-status">Signed in as <%= session[:username] %>.
+       <button type="submit">Sign Out</button>
+    </p>
+  </form>
 <% else %>
-  <p><em>You have been signed out.</em></p><form action="/users/signin" method="get"><button type="submit">Sign In</button></form>
+  <p class="user-status"><a href="/users/signin">Sign In</a></p>
 <% end %>

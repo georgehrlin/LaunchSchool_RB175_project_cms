@@ -52,20 +52,18 @@ post '/users/signin' do
   password = params[:password]
 
   if username == 'admin' && password == 'secret'
-    session[:signed_in] = true
     session[:username] = username
     session[:message] = 'Welcome!'
     redirect '/'
   else
+    status 422
     session[:message] = 'Invalid credentials.'
-    #redirect'/users/signin'
     erb :signin
   end
 end
 
 post '/users/signout' do
-  session[:signed_in] = false
-  session[:username] = nil
+  session.delete(:username)
   session[:message] = 'You are signed out.'
   redirect '/'
 end
