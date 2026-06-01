@@ -88,7 +88,16 @@ class CMSTest < Minitest::Test
     assert_includes last_response.body, %q(<input type="submit")
   end
 
-  def test_updating_a_document
+  def test_acess_edit_page_of_a_document_when_signed_out
+    create_document 'javascript.md', "# JavaScript is...\n - A high-level, multi-paradigm programming language"
+
+    get '/javascript.md/edit'
+
+    assert_equal 302, last_response.status
+    assert_equal 'You must be signed in to do that.', session['message']
+  end
+
+  def test_update_a_document
     create_document 'javascript.md', "# JavaScript is...\n - A high-level, multi-paradigm programming language"
 
     post '/javascript.md', { file_edit: 'testing' }, admin_session
@@ -100,10 +109,24 @@ class CMSTest < Minitest::Test
     assert_includes last_response.body, 'testing'
   end
 
+  def test_update_a_document_when_signed_out
+    create_document 'javascript.md', "# JavaScript is...\n - A high-level, multi-paradigm programming language"
+
+    post '/javascript.md'
+    assert_equal 302, last_response.status
+    assert_equal 'You must be signed in to do that.', session['message']
+  end
+
   def test_acccess_page_to_add_a_new_file
     get '/new', {}, admin_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, 'a new document:'
+  end
+
+  def test_acccess_page_to_add_a_new_file_when_signed_out
+    get '/new'
+    assert_equal 302, last_response.status
+    assert_equal 'You must be signed in to do that.', session['message']
   end
 
   def test_add_a_new_file
@@ -111,6 +134,12 @@ class CMSTest < Minitest::Test
     assert_equal 302, last_response.status
     assert_equal 'test_file.md was created.', session['message']
     assert File.exist?(File.join(data_path, 'test_file.md'))
+  end
+
+  def test_add_a_new_file_when_signed_out
+    post '/new'
+    assert_equal 302, last_response.status
+    assert_equal 'You must be signed in to do that.', session['message']
   end
 
   def test_add_a_new_file_without_a_name
@@ -126,6 +155,15 @@ class CMSTest < Minitest::Test
     post '/file_to_be_deleted.md/delete', {}, admin_session
     assert_equal 'file_to_be_deleted.md has been deleted.', session[:message]
     refute File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
+  end
+
+  def test_delete_a_file_when_signed_out
+    create_document 'file_to_be_deleted.md'
+    assert File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
+
+    post '/file_to_be_deleted.md/delete'
+    assert_equal 302, last_response.status
+    assert_equal 'You must be signed in to do that.', session['message']
   end
 
   def test_sign_in_with_valid_credentials

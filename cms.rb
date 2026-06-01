@@ -35,8 +35,12 @@ def load_file_content(file_path)
   end
 end
 
-def redirect_to_index_if_not_signed_in
-  if session[:username].nil?
+def user_signed_in?
+  session.key?(:username)
+end
+
+def require_signed_in_user
+  unless user_signed_in?
     session[:message] = 'You must be signed in to do that.'
     redirect '/'
   end
@@ -76,12 +80,12 @@ post '/users/signout' do
 end
 
 get '/new' do
-  redirect_to_index_if_not_signed_in
+  require_signed_in_user
   erb :new
 end
 
 post '/new' do
-  redirect_to_index_if_not_signed_in
+  require_signed_in_user
 
   new_file_name = params[:new_file]
 
@@ -114,7 +118,7 @@ get '/:file_name' do
 end
 
 get '/:file_name/edit' do
-  redirect_to_index_if_not_signed_in
+  require_signed_in_user
 
   @file_name = params[:file_name]
   file_path = File.join(data_path, @file_name)
@@ -123,7 +127,7 @@ get '/:file_name/edit' do
 end
 
 post '/:file_name' do
-  redirect_to_index_if_not_signed_in
+  require_signed_in_user
 
   @file_name = params[:file_name]
   file_path = File.join(data_path, @file_name)
@@ -133,7 +137,7 @@ post '/:file_name' do
 end
 
 post '/:file_name/delete' do
-  redirect_to_index_if_not_signed_in
+  require_signed_in_user
 
   file_name = params[:file_name]
   file_path = File.join(data_path, file_name)
