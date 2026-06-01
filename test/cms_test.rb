@@ -14,6 +14,10 @@ class CMSTest < Minitest::Test
     Sinatra::Application
   end
 
+  def session
+    last_request['rack.session']
+  end
+
   def setup
     FileUtils.mkdir_p(data_path)
   end
@@ -51,12 +55,9 @@ class CMSTest < Minitest::Test
   end
 
   def test_invalid_file_name
-    get '/iaminvalid.file'
+    get '/iaminvalid.md'
     assert_equal 302, last_response.status
-
-    get last_response["Location"]
-    assert_equal 200, last_response.status
-    assert_includes last_response.body, 'iaminvalid.file does not exist.'
+    assert_equal 'iaminvalid.md does not exist', session[:message]
 
     get '/'
     refute_includes last_response.body, 'iaminvalid.file does not exist.'
@@ -87,10 +88,8 @@ class CMSTest < Minitest::Test
     create_document 'javascript.md', "# JavaScript is...\n - A high-level, multi-paradigm programming language"
 
     post '/javascript.md', file_edit: 'testing'
+    assert_equal 'javascript.md has been updated.', session[:message]
     assert_equal 302, last_response.status
-
-    get last_response['Location']
-    assert_includes last_response.body, "javascript.md has been updated."
 
     get '/javascript.md'
     assert_equal 200, last_response.status
@@ -106,6 +105,7 @@ class CMSTest < Minitest::Test
   def test_add_a_new_file
     post '/new', new_file: 'test_file.md'
     assert_equal 302, last_response.status
+    assert_equal 'test_file.md was created.', session[:message]
     assert File.exist?(File.join(data_path, 'test_file.md'))
   end
 
@@ -120,33 +120,42 @@ class CMSTest < Minitest::Test
     assert File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
 
     post '/file_to_be_deleted.md/delete'
+    assert_equal 'file_to_be_deleted.md has been deleted.'
     refute File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
+  end
+
+  
+  def test_sign_in_with_valid_credentials
+    post '/users/signin', username: 'admin', password: 'secret'
+    assert_equal 302, last_response.status
+    assert_equal 'admin', session[:username]
+    assert_equal 'Welcome!', session[:message]
+
+    get last_response['Location']
+    assert_includes last_response.body, 'Welcome!'
   end
 
   def test_sign_in_with_invalid_credentials
     post '/users/signin', username: 'invalid', password: 'wrong password'
     assert_equal 422, last_response.status
+    assert_nil session[:username]
     assert_includes last_response.body, 'Invalid credentials.'
   end
 
-  def test_sign_in_with_valid_credentials
-    post '/users/signin', username: 'admin', password: 'secret'
-    assert_equal 302, last_response.status
-
-    get last_response['Location']
-    assert_includes last_response.body, 'Welcome!'
-  end
-
   def test_sign_out_button
-    post '/users/signin', username: 'admin', password: 'secret'
-    get last_response['Location']
-    assert_includes last_response.body, 'Welcome!'
+    get '/', {}, { "rack.session" => {username: 'admin'} }
+    assert_includes last_response.body, "Signed in as admin."
+
+    # post '/users/signin', username: 'admin', password: 'secret'
+    # get last_response['Location']
+    # assert_includes last_response.body, 'Welcome!'
 
     post '/users/signout'
     assert_equal 302, last_response.status
+    assert_equal 'You have been signed out.', session[:message]
 
     get last_response['Location']
-    assert_includes last_response.body, 'You are signed out.'
-    assert_includes last_response.body, 'Sign In'
+    assert_nil session[:username]
+    assert_includes last_resopnse.body, 'Sign In'
   end
 end
