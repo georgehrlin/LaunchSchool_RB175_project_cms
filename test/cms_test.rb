@@ -15,7 +15,7 @@ class CMSTest < Minitest::Test
   end
 
   def session
-    last_request['rack.session']
+    last_request.env['rack.session']
   end
 
   def setup
@@ -30,6 +30,10 @@ class CMSTest < Minitest::Test
     File.open(File.join(data_path, name), 'w') do |file|
       file.write(content)
     end
+  end
+
+  def admin_session
+    { 'rack.session' => { username: 'admin' } }
   end
 
   def test_index
@@ -57,7 +61,7 @@ class CMSTest < Minitest::Test
   def test_invalid_file_name
     get '/iaminvalid.md'
     assert_equal 302, last_response.status
-    assert_equal 'iaminvalid.md does not exist', session[:message]
+    assert_equal 'iaminvalid.md does not exist.', session[:message]
 
     get '/'
     refute_includes last_response.body, 'iaminvalid.file does not exist.'
@@ -74,10 +78,10 @@ class CMSTest < Minitest::Test
     assert_includes last_response.body, 'to add formatting to plain text files'
   end
 
-  def test_editing_a_document
+  def test_acess_edit_page_of_a_document
     create_document 'javascript.md', "# JavaScript is...\n - A high-level, multi-paradigm programming language"
 
-    get '/javascript.md/edit'
+    get '/javascript.md/edit', {}, admin_session
 
     assert_equal 200, last_response.status
     assert_includes last_response.body, "<textarea"
@@ -87,8 +91,8 @@ class CMSTest < Minitest::Test
   def test_updating_a_document
     create_document 'javascript.md', "# JavaScript is...\n - A high-level, multi-paradigm programming language"
 
-    post '/javascript.md', file_edit: 'testing'
-    assert_equal 'javascript.md has been updated.', session[:message]
+    post '/javascript.md', { file_edit: 'testing' }, admin_session
+    assert_equal 'javascript.md has been updated.', session['message']
     assert_equal 302, last_response.status
 
     get '/javascript.md'
@@ -96,21 +100,21 @@ class CMSTest < Minitest::Test
     assert_includes last_response.body, 'testing'
   end
 
-  def test_page_to_add_a_new_file
-    get '/new'
+  def test_acccess_page_to_add_a_new_file
+    get '/new', {}, admin_session
     assert_equal 200, last_response.status
     assert_includes last_response.body, 'a new document:'
   end
 
   def test_add_a_new_file
-    post '/new', new_file: 'test_file.md'
+    post '/new', { new_file: 'test_file.md' }, admin_session
     assert_equal 302, last_response.status
-    assert_equal 'test_file.md was created.', session[:message]
+    assert_equal 'test_file.md was created.', session['message']
     assert File.exist?(File.join(data_path, 'test_file.md'))
   end
 
   def test_add_a_new_file_without_a_name
-    post '/new', new_file: ''
+    post '/new', {new_file: ''}, admin_session
     assert_equal 422, last_response.status
     assert_includes last_response.body, 'A name is required.'
   end
@@ -119,12 +123,11 @@ class CMSTest < Minitest::Test
     create_document 'file_to_be_deleted.md'
     assert File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
 
-    post '/file_to_be_deleted.md/delete'
-    assert_equal 'file_to_be_deleted.md has been deleted.'
+    post '/file_to_be_deleted.md/delete', {}, admin_session
+    assert_equal 'file_to_be_deleted.md has been deleted.', session[:message]
     refute File.exist?(File.join(data_path, 'file_to_be_deleted.md'))
   end
 
-  
   def test_sign_in_with_valid_credentials
     post '/users/signin', username: 'admin', password: 'secret'
     assert_equal 302, last_response.status
@@ -143,19 +146,15 @@ class CMSTest < Minitest::Test
   end
 
   def test_sign_out_button
-    get '/', {}, { "rack.session" => {username: 'admin'} }
+    get '/', {}, admin_session
     assert_includes last_response.body, "Signed in as admin."
-
-    # post '/users/signin', username: 'admin', password: 'secret'
-    # get last_response['Location']
-    # assert_includes last_response.body, 'Welcome!'
 
     post '/users/signout'
     assert_equal 302, last_response.status
-    assert_equal 'You have been signed out.', session[:message]
+    assert_equal 'You are signed out.', session[:message]
 
     get last_response['Location']
     assert_nil session[:username]
-    assert_includes last_resopnse.body, 'Sign In'
+    assert_includes last_response.body, 'Sign In'
   end
 end

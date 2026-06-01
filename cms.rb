@@ -35,6 +35,13 @@ def load_file_content(file_path)
   end
 end
 
+def redirect_to_index_if_not_signed_in
+  if session[:username].nil?
+    session[:message] = 'You must be signed in to do that.'
+    redirect '/'
+  end
+end
+
 get '/' do
   pattern = File.join(data_path, '*')
   @files_in_data = Dir.glob(pattern). map do |path|
@@ -69,10 +76,13 @@ post '/users/signout' do
 end
 
 get '/new' do
+  redirect_to_index_if_not_signed_in
   erb :new
 end
 
 post '/new' do
+  redirect_to_index_if_not_signed_in
+
   new_file_name = params[:new_file]
 
   if new_file_name.empty?
@@ -104,6 +114,8 @@ get '/:file_name' do
 end
 
 get '/:file_name/edit' do
+  redirect_to_index_if_not_signed_in
+
   @file_name = params[:file_name]
   file_path = File.join(data_path, @file_name)
   @file_content = File.read(file_path)
@@ -111,6 +123,8 @@ get '/:file_name/edit' do
 end
 
 post '/:file_name' do
+  redirect_to_index_if_not_signed_in
+
   @file_name = params[:file_name]
   file_path = File.join(data_path, @file_name)
   File.write(file_path, params['file_edit'])
@@ -119,9 +133,11 @@ post '/:file_name' do
 end
 
 post '/:file_name/delete' do
+  redirect_to_index_if_not_signed_in
+
   file_name = params[:file_name]
   file_path = File.join(data_path, file_name)
   File.delete(file_path)
-  session[:message] = "#{@file_name} has been deleted."
+  session[:message] = "#{file_name} has been deleted."
   redirect '/'
 end
