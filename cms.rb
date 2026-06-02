@@ -3,8 +3,11 @@ require 'sinatra/contrib'
 require 'sinatra/reloader'
 require 'tilt/erubi'
 require 'redcarpet'
+require 'yaml'
 
 require 'pry-byebug'
+
+CREDENTIALS = YAML.load_file('signin_credentials.yml')
 
 configure do
   enable :sessions
@@ -62,7 +65,7 @@ post '/users/signin' do
   username = params[:username]
   password = params[:password]
 
-  if username == 'admin' && password == 'secret'
+  if CREDENTIALS.key?(username) && CREDENTIALS[username] == password
     session[:username] = username
     session[:message] = 'Welcome!'
     redirect '/'
