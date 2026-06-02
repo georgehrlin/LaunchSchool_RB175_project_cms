@@ -4,6 +4,7 @@ require 'sinatra/reloader'
 require 'tilt/erubi'
 require 'redcarpet'
 require 'yaml'
+require 'bcrypt'
 
 require 'pry-byebug'
 
@@ -28,6 +29,17 @@ def load_credentials
       File.expand_path('../users.yml', __FILE__)
     end
   YAML.load_file(credentials_path)
+end
+
+def valid_credentials(username, password)
+  credentials = load_credentials
+
+  if credentials.key?(username)
+    bcrypt_password = BCrypt::Password.new(credentials[username])
+    bcrypt_password == password
+  else
+    false
+  end
 end
 
 def load_file_content(file_path)
@@ -75,7 +87,7 @@ post '/users/signin' do
   username = params[:username]
   password = params[:password]
 
-  if credentials.key?(username) && credentials[username] == password
+  if valid_credentials(username, password)
     session[:username] = username
     session[:message] = 'Welcome!'
     redirect '/'
