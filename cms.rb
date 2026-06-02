@@ -7,7 +7,7 @@ require 'yaml'
 
 require 'pry-byebug'
 
-CREDENTIALS = YAML.load_file('signin_credentials.yml')
+CREDENTIALS = YAML.load_file('users.yml')
 
 configure do
   enable :sessions
