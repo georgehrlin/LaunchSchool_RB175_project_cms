@@ -7,8 +7,6 @@ require 'yaml'
 
 require 'pry-byebug'
 
-CREDENTIALS = YAML.load_file('users.yml')
-
 configure do
   enable :sessions
   set :session_secret, SecureRandom.hex(32)
@@ -22,9 +20,14 @@ def data_path
   end
 end
 
-def render_markdown(markdown_text)
-  markdown_renderer = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
-  markdown_renderer.render(markdown_text)
+def load_credentials
+  credentials_path = 
+    if ENV['RACK_ENV'] == 'test'
+      File.expand_path('../test/users.yml', __FILE__)
+    else
+      File.expand_path('../users.yml', __FILE__)
+    end
+  YAML.load_file(credentials_path)
 end
 
 def load_file_content(file_path)
@@ -49,6 +52,12 @@ def require_signed_in_user
   end
 end
 
+def render_markdown(markdown_text)
+  markdown_renderer = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+  markdown_renderer.render(markdown_text)
+end
+
+
 get '/' do
   pattern = File.join(data_path, '*')
   @files_in_data = Dir.glob(pattern). map do |path|
@@ -62,10 +71,11 @@ get '/users/signin' do
 end
 
 post '/users/signin' do
+  credentials = load_credentials
   username = params[:username]
   password = params[:password]
 
-  if CREDENTIALS.key?(username) && CREDENTIALS[username] == password
+  if credentials.key?(username) && credentials[username] == password
     session[:username] = username
     session[:message] = 'Welcome!'
     redirect '/'

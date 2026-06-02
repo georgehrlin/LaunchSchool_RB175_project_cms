@@ -167,8 +167,9 @@ class CMSTest < Minitest::Test
   end
 
   def test_sign_in_with_valid_credentials
-    username = CREDENTIALS.keys.sample
-    password = CREDENTIALS[username]
+    credentials = load_credentials
+    username = credentials.keys.sample
+    password = credentials[username]
     post '/users/signin', username: username, password: password
     assert_equal 302, last_response.status
     assert_equal username, session[:username]
